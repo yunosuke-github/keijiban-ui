@@ -66,7 +66,6 @@ const ThreadDetail = () => {
     e.preventDefault();
     const newComment = {
       thread_id: threadId,
-      user_id: currentUser.id,
       content: comment
     };
     try {
