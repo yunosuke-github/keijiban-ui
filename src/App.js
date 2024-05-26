@@ -41,6 +41,8 @@ function App() {
 
     if (storedToken) {
       fetchUser();
+    } else {
+      setLoading(false);
     }
 
   }, []);
