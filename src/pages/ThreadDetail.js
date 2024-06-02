@@ -25,7 +25,15 @@ import { ThumbUp, ThumbDown, MoreVert } from '@mui/icons-material';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { materialDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { createComment, getComments, getCurrentUser, getThread, updateThread, deleteThread } from '../api';
+import {
+  createComment,
+  getComments,
+  getCurrentUser,
+  getThread,
+  updateThread,
+  deleteThread,
+  commentReaction
+} from '../api';
 import hljs from 'highlight.js';
 import 'highlight.js/styles/default.css';
 
@@ -78,7 +86,8 @@ const ThreadDetail = () => {
     }
   };
 
-  const handleLike = (commentId) => {
+  const handleLike = async (commentId) => {
+    const comment = await commentReaction(commentId, 'like');
     setComments(
       comments.map((comment) =>
         comment.id === commentId ? { ...comment, likes: comment.likes + 1 } : comment
@@ -86,7 +95,8 @@ const ThreadDetail = () => {
     );
   };
 
-  const handleDislike = (commentId) => {
+  const handleDislike = async (commentId) => {
+    const comment = await commentReaction(commentId, 'dislike');
     setComments(
       comments.map((comment) =>
         comment.id === commentId ? { ...comment, dislikes: comment.dislikes + 1 } : comment
