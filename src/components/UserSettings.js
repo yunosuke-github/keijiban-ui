@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Typography, Box, TextField, Button, Avatar, Tabs, Tab } from '@mui/material';
+import {Container, Typography, Box, TextField, Button, Avatar, Tabs, Tab, Alert, Snackbar} from '@mui/material';
 import { getCurrentUser, updateUser } from '../api';
 
 const UserSettings = () => {
@@ -9,6 +9,8 @@ const UserSettings = () => {
   const [avatar, setAvatar] = useState('');
   const [isEditing, setIsEditing] = useState(true);  // 編集モードをデフォルトに設定
   const [tabIndex, setTabIndex] = useState(0);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarText, setSnackbarText] = useState('');
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -30,10 +32,17 @@ const UserSettings = () => {
       const updatedUser = await updateUser(user.id, { name: name });
       setUser(updatedUser);
       setIsEditing(false);
+      setSnackbarText('ユーザー情報を更新しました');
+      setOpenSnackbar(true);
     } catch (error) {
       console.error('Failed to update user', error);
     }
   };
+
+  const handleCloseSnackbar = () => {
+    setOpenSnackbar(false);
+    setSnackbarText('');
+  }
 
   return (
     <Container maxWidth="md" sx={{ color: '#FFFFFF', borderRadius: 2, p: 4, mt: 8 }}>
@@ -76,6 +85,16 @@ const UserSettings = () => {
             >
               保存
             </Button>
+            <Snackbar anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }} open={openSnackbar} autoHideDuration={6000} onClose={handleCloseSnackbar}>
+              <Alert
+                onClose={handleCloseSnackbar}
+                severity="success"
+                variant="filled"
+                sx={{ width: '100%', background: '#10a37f' }}
+              >
+                { snackbarText }
+              </Alert>
+            </Snackbar>
           </Box>
         )}
         {tabIndex !== 0 && (
