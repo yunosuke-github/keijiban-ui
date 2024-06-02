@@ -175,6 +175,15 @@ export const getComments = async (thread_id=null, sort='created_at', order='desc
   }
 };
 
+export const deleteComment = async (commentId) => {
+  try {
+    const response = await apiClient.delete(`/comments/${commentId}`);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to delete comment');
+  }
+};
+
 export const commentReaction = async (commentId, action) => {
   var url = `/comments/${commentId}/${action}`;
   try {

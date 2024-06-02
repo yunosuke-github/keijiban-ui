@@ -21,7 +21,7 @@ import {
   Menu,
   MenuItem
 } from '@mui/material';
-import { ThumbUp, ThumbDown, MoreVert } from '@mui/icons-material';
+import { ThumbUp, ThumbDown, MoreVert, Delete } from '@mui/icons-material';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { materialDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
@@ -32,7 +32,8 @@ import {
   getThread,
   updateThread,
   deleteThread,
-  commentReaction
+  commentReaction,
+  deleteComment
 } from '../api';
 import hljs from 'highlight.js';
 import 'highlight.js/styles/default.css';
@@ -48,6 +49,7 @@ const ThreadDetail = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [menuAnchorEl, setMenuAnchorEl] = useState(null);
+  const [commentToDelete, setCommentToDelete] = useState(null);  // 追加
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -136,6 +138,17 @@ const ThreadDetail = () => {
     }
   };
 
+  const handleDeleteComment = async () => {
+    try {
+      await deleteComment(commentToDelete);
+      const comments = await getComments(threadId, 'created_at', 'desc');
+      setComments(comments);
+      setCommentToDelete(null);
+    } catch (error) {
+      console.error(error.message);
+    }
+  };
+
   const renderCommentContent = (content) => {
     const codeBlockRegex = /```(.*?)\n([\s\S]*?)```/gs;
     const parts = content.split(codeBlockRegex);
@@ -216,14 +229,25 @@ const ThreadDetail = () => {
                 </ListItemAvatar>
                 <ListItemText
                   primary={
-                    <>
-                      <Typography component="span" variant="body2" color="textPrimary">
-                        {comment.user.name}
-                      </Typography>
-                      <Typography component="span" variant="body2" color="textSecondary" sx={{ ml: 1 }}>
-                        {comment.created_at}
-                      </Typography>
-                    </>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Box>
+                        <Typography component="span" variant="body2" color="textPrimary">
+                          {comment.user.name}
+                        </Typography>
+                        <Typography component="span" variant="body2" color="textSecondary" sx={{ ml: 1 }}>
+                          {comment.created_at}
+                        </Typography>
+                      </Box>
+                      {currentUser && currentUser.id === comment.user_id && (
+                        <IconButton
+                          edge="end"
+                          aria-label="delete"
+                          onClick={() => setCommentToDelete(comment.id)}
+                        >
+                          <Delete />
+                        </IconButton>
+                      )}
+                    </Box>
                   }
                   secondary={
                     <>
@@ -288,6 +312,20 @@ const ThreadDetail = () => {
             キャンセル
           </Button>
           <Button onClick={handleDeleteThread} color="error">
+            削除
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog open={Boolean(commentToDelete)} onClose={() => setCommentToDelete(null)}>
+        <DialogTitle>コメントの削除</DialogTitle>
+        <DialogContent>
+          <DialogContentText>本当にこのコメントを削除しますか？この操作は元に戻せません。</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setCommentToDelete(null)} color="primary">
+            キャンセル
+          </Button>
+          <Button onClick={handleDeleteComment} color="error">
             削除
           </Button>
         </DialogActions>
