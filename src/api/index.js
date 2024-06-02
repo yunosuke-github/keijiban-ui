@@ -175,4 +175,14 @@ export const getComments = async (thread_id=null, sort='created_at', order='desc
   }
 };
 
+export const commentReaction = async (commentId, action) => {
+  var url = `/comments/${commentId}/${action}`;
+  try {
+    const response = await apiClient.post(url, {});
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Comment reaction failed');
+  }
+};
+
 export default apiClient;
